@@ -10,7 +10,7 @@ def lp(efficiency, cap, investment_duration, start_period):
 
     x = {
         t: {
-            s: LpVariable(name=f"loss_{t+2010}_{s+1}", lowBound=0)
+            s: LpVariable(name=f"investment_{t+2010}_{s+1}", lowBound=0)
             for s in range(n_strategies)
         }
         for t in range(n_periods)
@@ -48,13 +48,16 @@ def lp(efficiency, cap, investment_duration, start_period):
         for s in range(n_strategies):
             model += x[t][s] <= cap[s]
 
-    for s in range(n_strategies):
-        for t in range(start_period[s]):
-            model += x[t][s] == 0
+    # for s in range(n_strategies):
+    #     for t in range(start_period[s]):
+    #         model += x[t][s] == 0
 
     # Do not allow to make the same investment more than once
 
     # integer variable
+
+    M = 1000  # large enough number
+
     u = {
         t: {
             s: LpVariable(name=f"indicator_{t+2010}_{s+1}", cat="Binary")
@@ -63,32 +66,26 @@ def lp(efficiency, cap, investment_duration, start_period):
         for t in range(n_periods)
     }
 
-    M = 1000  # large enough number
-
     for s in range(n_strategies):
         model += lpSum(u[t][s] for t in range(n_periods)) <= 1
 
     for s in range(n_strategies):
         for t in range(n_periods):
             model += x[t][s] <= M * u[t][s]
-
-
     # Solve the problem
     model.solve()
-    print("Objective Value: ")
-    print(model.objective)
 
     print("Variables: ")
     for x in model.variables():
         print(f"{x.name} = {x.value()}")
-    print("Objective function value: ", model.objective.value())
-    print(model.constraints)
 
+    print("Objective function value: ", model.objective.value())
+    # print(model.constraints)
 
     return
 
 efficiency = [0.2, 0.25, 0.4, 0.25, 0.15]
-cap = [10, 0.4, 0.4, 0.4, 0.3, 10]
+cap = [1000, 0.4, 0.4, 0.3, 1000]
 investment_duration = [1, 3, 3, 2, 1]
 start_period = [0, 1, 2, 2, 0]
 
