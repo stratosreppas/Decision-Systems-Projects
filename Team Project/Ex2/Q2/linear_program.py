@@ -31,6 +31,7 @@ def lp(costs, output, demands):
     print("Variables: ")
     for x in model.variables():
         print(f"{x.name} = {x.value()}")
+    print("Objective function value: ", model.objective.value())
 
 def main():
 
