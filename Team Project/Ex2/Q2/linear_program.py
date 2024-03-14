@@ -13,9 +13,19 @@ def lp(costs, output, demands):
         for factory in range(0, 3)
     }
 
-    #  Objective function
-    model += lpSum(x[factory][storage_unit] * costs[factory][storage_unit] for factory in range(0, 3) for storage_unit in range(0, 4))
+    # used for the case of the cost not per unit
+    u = {
+        factory: {
+            storage_unit: LpVariable(name=f"u_{factory+1}_{storage_unit+1}", lowBound=0, cat="Integer")
+            for storage_unit in range(0, 4)
+        }
+        for factory in range(0, 3)
+    }
 
+    #  Objective function
+    # TODO: Change the x value to u to calculate the case of the cost not per unit
+    model += lpSum(x[factory][storage_unit] * costs[factory][storage_unit]
+                   for factory in range(0, 3) for storage_unit in range(0, 4))
     # Output Constraints
     for factory in range(0, 3):
         model += lpSum(x[factory][storage_unit] for storage_unit in range(0, 4)) <= output[factory]
@@ -23,6 +33,10 @@ def lp(costs, output, demands):
     for storage_unit in range(0, 4):
         model += lpSum(x[factory][storage_unit] for factory in range(0, 3)) >= demands[storage_unit]
 
+    # In case the costs aren't per car - Ιnteger Constraint
+    for factory in range(0, 3):
+        for storage_unit in range(0, 4):
+            model += x[factory][storage_unit] <= u[factory][storage_unit] * 100000
 
     # Solve the problem
     model.solve()
@@ -32,6 +46,7 @@ def lp(costs, output, demands):
     for x in model.variables():
         print(f"{x.name} = {x.value()}")
     print("Objective function value: ", model.objective.value())
+    print(model.objective)
 
 def main():
 
