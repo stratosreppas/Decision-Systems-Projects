@@ -1,6 +1,4 @@
-# Under Construction...
-
-## Decision Systems
+# Decision Systems
 This is a repository for the projects completed in the context of the Decision Systems course. Its main focus is linear programming and decision trees.
 
 #### Contributing
